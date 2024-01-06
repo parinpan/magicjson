@@ -8,7 +8,7 @@ MagicJSON is a Golang package designed to provide marshaling of private struct f
 
 ## Why MagicJSON?
 
-Golang's JSON marshaling typically requires struct fields to be exported, revealing implementation details. MagicJSON breaks this limitation, enabling you to marshal private fields without compromising the integrity of your struct's encapsulation. This is particularly useful when dealing with sensitive information or when you want to hide implementation details.
+Golang's JSON marshaling typically requires struct fields to be exported, revealing implementation details. MagicJSON breaks this limitation, enabling you to marshal private fields without compromising the integrity of your struct's encapsulation. This is particularly useful when you want to hide implementation details.
 
 ## Features
 
