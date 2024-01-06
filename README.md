@@ -24,6 +24,16 @@ Golang's JSON marshaling typically requires struct fields to be exported, reveal
 
 - **Does Not Read JSON Struct Tags for Private Fields:** MagicJSON relies on reflection and does not read JSON struct tags for private fields. This means that custom JSON struct tags on private fields will not be considered during marshaling.
 
+- **Fiields with MarshalJSON as Pointers:** To leverage custom JSON marshaling for private fields, they must be defined as pointers in the struct. This ensures that the library can access and marshal the respective private fields correctly. Example:
+
+```go
+// MagicJSON can only marshal dateB field (time.Time implements MarshalJSON internally)
+type yourStruct struct {
+    dateA time.Time
+    dateB *time.Time
+}
+```
+
 ## Installation
 
 ```bash
