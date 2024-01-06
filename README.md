@@ -54,28 +54,40 @@ import "github.com/parinpan/magicjson"
 package main
 
 import (
-    "fmt"
-    "github.com/parinpan/magicjson"
+	"fmt"
+	"time"
+
+	"github.com/parinpan/magicjson"
 )
 
 type ExampleStruct struct {
-    // ... your private fields here
+	// your private fields here
+	a int
+	b string
+	c *time.Time
 }
 
 func main() {
-    obj := ExampleStruct{
-        // ... initialize your struct
-    }
+	t := time.Now()
+	
+	obj := ExampleStruct{
+		a: 10,
+		b: "hello, world",
+		c: &t,
+	}
 
-    payload, err := magicjson.MarshalJSON(obj)
-    if err != nil {
-        fmt.Println("Error:", err)
-        return
-    }
+	payload, err := magicjson.Marshal(obj)
+	if err != nil {
+		fmt.Println("Error:", err)
+		return
+	}
 
-    fmt.Println("JSON Payload:", string(payload))
+	// output: {"a": 10, "b": "hello, world", "c": "2024-01-06 14:28:06.094184"}
+	fmt.Println("JSON Payload:", string(payload))
 }
 ```
+
+Please see `json_test.go` for detailed example.
 
 ## How It Works
 

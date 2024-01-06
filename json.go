@@ -8,7 +8,7 @@ import (
 	"github.com/tidwall/sjson"
 )
 
-func MarshalJSON(anything any) (payload []byte, err error) {
+func Marshal(anything any) (payload []byte, err error) {
 	t := reflect.TypeOf(anything)
 
 	if anything == nil || isBytes(t) {
