@@ -91,7 +91,7 @@ Please see `json_test.go` for detailed example.
 
 ## How It Works
 
-MagicJSON employs a combination of reflection and custom parsing strategies to marshal private fields. The `magicjson.MarshalJSON` function dynamically explores the structure of the provided object and uses custom parsers to handle different types.
+MagicJSON employs a combination of reflection and custom parsing strategies to marshal private fields. The `magicjson.Marshal` function dynamically explores the structure of the provided object and uses custom parsers to handle different types.
 
 ## Custom Parsing Strategies
 
