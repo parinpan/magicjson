@@ -7,15 +7,15 @@ import (
 	"strconv"
 )
 
-func parse(t reflect.Type, v reflect.Value, marshaller bool) ([]byte, error) {
+func parse(v reflect.Value, marshaller bool) ([]byte, error) {
 	if !marshaller {
-		return defaultParser(t, v)
+		return defaultParser(v)
 	}
-	return marshalJSON(t, v)
+	return marshalJSON(v)
 }
 
-func marshalJSON(t reflect.Type, v reflect.Value) ([]byte, error) {
-	vPtr := reflect.NewAt(t.Elem(), v.UnsafePointer())
+func marshalJSON(v reflect.Value) ([]byte, error) {
+	vPtr := reflect.NewAt(v.Elem().Type(), v.UnsafePointer())
 	results := vPtr.Elem().MethodByName("MarshalJSON").Call([]reflect.Value{})
 
 	if len(results) != 2 {
@@ -39,8 +39,8 @@ func marshalJSON(t reflect.Type, v reflect.Value) ([]byte, error) {
 	return b, err
 }
 
-func defaultParser(t reflect.Type, v reflect.Value) ([]byte, error) {
-	result, err := resolve(t, v)
+func defaultParser(v reflect.Value) ([]byte, error) {
+	result, err := resolve(v)
 	if err != nil {
 		return nil, err
 	}
@@ -53,11 +53,11 @@ func defaultParser(t reflect.Type, v reflect.Value) ([]byte, error) {
 	return b, nil
 }
 
-func resolve(t reflect.Type, v reflect.Value) (any, error) {
+func resolve(v reflect.Value) (any, error) {
 	vKind := v.Kind()
 	s := fmt.Sprint(reflect.Indirect(v))
 
-	if isBytes(t) {
+	if isBytes(v.Type()) {
 		return json.Marshal(s)
 	}
 

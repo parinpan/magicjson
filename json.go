@@ -14,8 +14,8 @@ func Marshal(anything any) (payload []byte, err error) {
 		return json.Marshal(anything)
 	}
 
-	err = walk(anything, func(t reflect.Type, v reflect.Value, marshaller bool, path string) error {
-		bytes, err := parse(t, v, marshaller)
+	err = walk(anything, func(v reflect.Value, marshaller bool, path string) error {
+		bytes, err := parse(v, marshaller)
 		if err != nil {
 			return err
 		}

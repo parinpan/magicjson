@@ -6,7 +6,7 @@ import (
 	"reflect"
 )
 
-type callbackFn func(t reflect.Type, v reflect.Value, marshaller bool, path string) error
+type callbackFn func(v reflect.Value, marshaller bool, path string) error
 
 func walk(anything any, cb callbackFn) error {
 	return walker(reflect.TypeOf(anything), reflect.ValueOf(anything), "", cb)
@@ -16,12 +16,12 @@ func walker(t reflect.Type, v reflect.Value, path string, cb callbackFn) error {
 	// check if the value is the type of marshaler
 	if isMarshaler(v) {
 		ref := toRef(v)
-		return cb(ref.Type(), ref, true, path)
+		return cb(ref, true, path)
 	}
 
 	// de-reference the value when it's a pointer - a value can be a type of marshaler
 	if t.Kind() == reflect.Ptr && isMarshaler(v.Elem()) {
-		return cb(t, v, true, path)
+		return cb(v, true, path)
 	}
 
 	switch t.Kind() {
@@ -35,20 +35,24 @@ func walker(t reflect.Type, v reflect.Value, path string, cb callbackFn) error {
 		}
 	case reflect.Slice, reflect.Array:
 		for idx := 0; idx < v.Len(); idx++ {
-			if err := walker(v.Index(idx).Type(), v.Index(idx), addPath(path, fmt.Sprint(idx)), cb); err != nil {
+			item := v.Index(idx)
+
+			if err := walker(item.Type(), item, addPath(path, fmt.Sprint(idx)), cb); err != nil {
 				return err
 			}
 		}
 	case reflect.Map:
 		for _, key := range v.MapKeys() {
-			if err := walker(v.MapIndex(key).Type(), v.MapIndex(key), addPath(path, key.String()), cb); err != nil {
+			item := v.MapIndex(key)
+
+			if err := walker(item.Type(), item, addPath(path, key.String()), cb); err != nil {
 				return err
 			}
 		}
 	case reflect.Ptr:
 		return walker(t.Elem(), v.Elem(), path, cb)
 	default:
-		return cb(t, v, false, path)
+		return cb(v, false, path)
 	}
 
 	return nil
