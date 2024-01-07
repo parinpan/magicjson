@@ -15,8 +15,7 @@ func walk(anything any, cb callbackFn) error {
 func walker(t reflect.Type, v reflect.Value, path string, cb callbackFn) error {
 	// check if the value is the type of marshaler
 	if isMarshaler(v) {
-		ref := toRef(v)
-		return cb(ref, true, path)
+		return cb(toRef(v), true, path)
 	}
 
 	// de-reference the value when it's a pointer - a value can be a type of marshaler
