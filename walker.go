@@ -6,15 +6,22 @@ import (
 	"reflect"
 )
 
-func walk(anything any, cb func(t reflect.Type, v reflect.Value, canMarshal bool, path string) error) error {
+type callbackFn func(t reflect.Type, v reflect.Value, marshaller bool, path string) error
+
+func walk(anything any, cb callbackFn) error {
 	return walker(reflect.TypeOf(anything), reflect.ValueOf(anything), "", cb)
 }
 
-func walker(t reflect.Type, v reflect.Value, path string, cb func(t reflect.Type, v reflect.Value, canMarshal bool, path string) error) error {
-	if v.CanInterface() && isMarshaler(v) && t.Kind() != reflect.Ptr {
-		vPtr := reflect.New(t)
-		vPtr.Elem().Set(v)
-		return cb(vPtr.Type(), vPtr, true, path)
+func walker(t reflect.Type, v reflect.Value, path string, cb callbackFn) error {
+	// check if the value is the type of marshaler
+	if isMarshaler(v) {
+		ref := toRef(v)
+		return cb(ref.Type(), ref, true, path)
+	}
+
+	// de-reference the value when it's a pointer - a value can be a type of marshaler
+	if t.Kind() == reflect.Ptr && isMarshaler(v.Elem()) {
+		return cb(t, v, true, path)
 	}
 
 	switch t.Kind() {
@@ -39,9 +46,6 @@ func walker(t reflect.Type, v reflect.Value, path string, cb func(t reflect.Type
 			}
 		}
 	case reflect.Ptr:
-		if canMarshal(t.Elem()) {
-			return cb(t, v, true, path)
-		}
 		return walker(t.Elem(), v.Elem(), path, cb)
 	default:
 		return cb(t, v, false, path)
@@ -50,13 +54,14 @@ func walker(t reflect.Type, v reflect.Value, path string, cb func(t reflect.Type
 	return nil
 }
 
-func canMarshal(t reflect.Type) bool {
-	v := reflect.New(t)
-	return isMarshaler(v)
+func toRef(v reflect.Value) reflect.Value {
+	ref := reflect.New(v.Type())
+	ref.Elem().Set(v)
+	return ref
 }
 
 func isMarshaler(v reflect.Value) bool {
-	_, ok := v.Interface().(json.Marshaler)
+	_, ok := reflect.New(v.Type()).Interface().(json.Marshaler)
 	return ok
 }
 

@@ -7,14 +7,14 @@ import (
 	"strconv"
 )
 
-func parse(t reflect.Type, v reflect.Value, canMarshal bool) ([]byte, error) {
-	if !canMarshal {
+func parse(t reflect.Type, v reflect.Value, marshaller bool) ([]byte, error) {
+	if !marshaller {
 		return defaultParser(t, v)
 	}
-	return jsonMarshal(t, v)
+	return marshalJSON(t, v)
 }
 
-func jsonMarshal(t reflect.Type, v reflect.Value) ([]byte, error) {
+func marshalJSON(t reflect.Type, v reflect.Value) ([]byte, error) {
 	vPtr := reflect.NewAt(t.Elem(), v.UnsafePointer())
 	results := vPtr.Elem().MethodByName("MarshalJSON").Call([]reflect.Value{})
 
@@ -88,6 +88,20 @@ func resolve(t reflect.Type, v reflect.Value) (any, error) {
 	}
 
 	return s, nil
+}
+
+func isBytes(t reflect.Type) bool {
+	return fmt.Sprint(t) == `[]uint8`
+}
+
+func isEmptySlice(anything any) bool {
+	v := reflect.ValueOf(anything)
+
+	if v.Kind() == reflect.Slice || v.Kind() == reflect.Array {
+		return v.Len() == 0
+	}
+
+	return false
 }
 
 func matchKind(kind reflect.Kind, kinds ...reflect.Kind) bool {

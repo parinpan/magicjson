@@ -102,6 +102,19 @@ func TestMarshal(t *testing.T) {
 		}
 	})
 
+	t.Run("should successfully marshal on an empty slice", func(t *testing.T) {
+		expected, _ := json.Marshal([]school{})
+		actual, err := magicjson.Marshal([]school{})
+
+		if !reflect.DeepEqual(actual, expected) {
+			t.Fatalf("got: %s, expected: %s", string(actual), string(expected))
+		}
+
+		if err != nil {
+			t.Fatal("should not raise an error")
+		}
+	})
+
 	t.Run("should successfully marshal given data", func(t *testing.T) {
 		joinedAt := toPtr(time.Unix(1704537759, 0).UTC())
 		establishedAt := toPtr(time.Unix(1504537759, 0).UTC())
@@ -131,13 +144,13 @@ func TestMarshal(t *testing.T) {
 					},
 				},
 				Location: Location{
-					Latitude:  1,
-					Longitude: 2,
+					Latitude:  1.1,
+					Longitude: 2.2,
 				},
 			},
 		}
 
-		expected := []byte(`[{"name":"School A","establishedDate":"2017-09-04T15:09:19Z","classRooms":[{"name":"Class A","capacity":100,"homeRoomTeacher":{"name":"Mrs. Diana","age":30,"height":180.5,"joinedAt":"2024-01-06T10:42:39Z"},"students":[{"name":"Brian","age":14,"height":170.5,"joinedAt":"2024-01-06T10:42:39Z"}]}],"Location":lat:1.000000,lon:2.000000}]`)
+		expected := []byte(`[{"name":"School A","establishedDate":"2017-09-04T15:09:19Z","classRooms":[{"name":"Class A","capacity":100,"homeRoomTeacher":{"name":"Mrs. Diana","age":30,"height":180.5,"joinedAt":"2024-01-06T10:42:39Z"},"students":[{"name":"Brian","age":14,"height":170.5,"joinedAt":"2024-01-06T10:42:39Z"}]}],"Location":lat:1.100000,lon:2.200000}]`)
 		actual, err := magicjson.Marshal(schools)
 
 		if !reflect.DeepEqual(actual, expected) {
