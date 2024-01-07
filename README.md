@@ -18,7 +18,7 @@ Golang's JSON marshaling typically requires struct fields to be exported, reveal
 
 ## Disclaimer
 
-**Experimental and Learning Purposes Only:** MagicJSON is designed for experimentation and learning purposes. While it showcases innovative techniques for private field marshaling, it may not be suitable for production use. Use it with caution and understand the potential risks before incorporating it into critical systems.
+**Experimental and Learning Purposes Only:** MagicJSON is designed for experimentation and learning purposes. While it showcases techniques for private field marshaling, it may not be suitable for production use. Use it with caution and understand the potential risks before incorporating it into critical systems.
 
 ## Limitations
 
