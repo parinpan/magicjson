@@ -18,25 +18,10 @@ func marshalJSON(v reflect.Value) ([]byte, error) {
 	vPtr := reflect.NewAt(v.Elem().Type(), v.UnsafePointer())
 	results := vPtr.Elem().MethodByName("MarshalJSON").Call([]reflect.Value{})
 
-	if len(results) != 2 {
-		return nil, fmt.Errorf("invalid length of results")
-	}
+	bytes, _ := results[0].Interface().([]byte)
+	err, _ := results[1].Interface().(error)
 
-	b, ok := results[0].Interface().([]byte)
-	if !ok {
-		return nil, fmt.Errorf("expected []byte type, got %s", results[0].Type())
-	}
-
-	if results[1].Interface() == nil {
-		return b, nil
-	}
-
-	err, ok := results[1].Interface().(error)
-	if !ok {
-		return nil, fmt.Errorf("expected error type, got %s", results[1].Type())
-	}
-
-	return b, err
+	return bytes, err
 }
 
 func defaultParser(v reflect.Value) ([]byte, error) {
