@@ -82,10 +82,7 @@ func isBytes(v reflect.Value) bool {
 }
 
 func isEmptySlice(v reflect.Value) bool {
-	if matchKind(v.Kind(), reflect.Slice, reflect.Array) {
-		return v.Len() == 0
-	}
-	return false
+	return matchKind(v.Kind(), reflect.Slice, reflect.Array) && v.Len() == 0
 }
 
 func matchKind(kind reflect.Kind, kinds ...reflect.Kind) bool {
