@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"reflect"
 	"strconv"
+	"strings"
 )
 
 func parse(v reflect.Value, marshaller bool) ([]byte, error) {
@@ -25,7 +26,13 @@ func marshalJSON(v reflect.Value) ([]byte, error) {
 }
 
 func defaultParser(v reflect.Value) ([]byte, error) {
-	result, err := resolve(v)
+	s := fmt.Sprint(reflect.Indirect(v))
+
+	if isBytes(v) {
+		return parseBytes(v, s)
+	}
+
+	result, err := resolve(v, s)
 	if err != nil {
 		return nil, err
 	}
@@ -38,13 +45,8 @@ func defaultParser(v reflect.Value) ([]byte, error) {
 	return b, nil
 }
 
-func resolve(v reflect.Value) (any, error) {
+func resolve(v reflect.Value, s string) (any, error) {
 	vKind := v.Kind()
-	s := fmt.Sprint(reflect.Indirect(v))
-
-	if isBytes(v.Type()) {
-		return json.Marshal(s)
-	}
 
 	if matchKind(vKind,
 		reflect.Int,
@@ -75,17 +77,14 @@ func resolve(v reflect.Value) (any, error) {
 	return s, nil
 }
 
-func isBytes(t reflect.Type) bool {
-	return fmt.Sprint(t) == `[]uint8`
+func isBytes(v reflect.Value) bool {
+	return fmt.Sprint(v.Type()) == `[]uint8`
 }
 
-func isEmptySlice(anything any) bool {
-	v := reflect.ValueOf(anything)
-
-	if v.Kind() == reflect.Slice || v.Kind() == reflect.Array {
+func isEmptySlice(v reflect.Value) bool {
+	if matchKind(v.Kind(), reflect.Slice, reflect.Array) {
 		return v.Len() == 0
 	}
-
 	return false
 }
 
@@ -96,4 +95,23 @@ func matchKind(kind reflect.Kind, kinds ...reflect.Kind) bool {
 		}
 	}
 	return false
+}
+
+func parseBytes(v reflect.Value, s string) ([]byte, error) {
+	if v.IsZero() {
+		return []byte(`null`), nil
+	}
+
+	bytes := make([]byte, 0)
+	chunks := strings.Split(s[1:len(s)-1], " ")
+
+	for i := range chunks {
+		val, err := strconv.ParseUint(chunks[i], 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		bytes = append(bytes, uint8(val))
+	}
+
+	return json.Marshal(bytes)
 }

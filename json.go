@@ -8,9 +8,9 @@ import (
 )
 
 func Marshal(anything any) (payload []byte, err error) {
-	t := reflect.TypeOf(anything)
+	anyV := reflect.ValueOf(anything)
 
-	if anything == nil || isBytes(t) || isEmptySlice(anything) {
+	if anything == nil || isBytes(anyV) || isEmptySlice(anyV) {
 		return json.Marshal(anything)
 	}
 

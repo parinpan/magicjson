@@ -16,7 +16,7 @@ type Location struct {
 }
 
 func (l Location) MarshalJSON() ([]byte, error) {
-	s := fmt.Sprintf("lat:%f,lon:%f", l.Latitude, l.Longitude)
+	s := fmt.Sprintf(`"lat:%f,lon:%f"`, l.Latitude, l.Longitude)
 	return []byte(s), nil
 }
 
@@ -42,11 +42,13 @@ type classRoom struct {
 }
 
 type school struct {
-	name            string
-	establishedDate *time.Time
-	classRooms      []classRoom
+	name                  string
+	establishedDate       *time.Time
+	classRooms            []classRoom
+	descriptionUnexported []byte
 
-	Location Location
+	Location            Location
+	DescriptionExported []byte
 }
 
 func TestMarshal(t *testing.T) {
@@ -143,14 +145,16 @@ func TestMarshal(t *testing.T) {
 						},
 					},
 				},
+				descriptionUnexported: []byte(`unexported description`),
 				Location: Location{
 					Latitude:  1.1,
 					Longitude: 2.2,
 				},
+				DescriptionExported: []byte(`exported description`),
 			},
 		}
 
-		expected := []byte(`[{"name":"School A","establishedDate":"2017-09-04T15:09:19Z","classRooms":[{"name":"Class A","capacity":100,"homeRoomTeacher":{"name":"Mrs. Diana","age":30,"height":180.5,"joinedAt":"2024-01-06T10:42:39Z"},"students":[{"name":"Brian","age":14,"height":170.5,"joinedAt":"2024-01-06T10:42:39Z"}]}],"Location":lat:1.100000,lon:2.200000}]`)
+		expected := []byte(`[{"name":"School A","establishedDate":"2017-09-04T15:09:19Z","classRooms":[{"name":"Class A","capacity":100,"homeRoomTeacher":{"name":"Mrs. Diana","age":30,"height":180.5,"joinedAt":"2024-01-06T10:42:39Z"},"students":[{"name":"Brian","age":14,"height":170.5,"joinedAt":"2024-01-06T10:42:39Z"}]}],"descriptionUnexported":"dW5leHBvcnRlZCBkZXNjcmlwdGlvbg==","Location":"lat:1.100000,lon:2.200000","DescriptionExported":"ZXhwb3J0ZWQgZGVzY3JpcHRpb24="}]`)
 		actual, err := magicjson.Marshal(schools)
 
 		if !reflect.DeepEqual(actual, expected) {

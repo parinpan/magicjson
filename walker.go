@@ -23,6 +23,10 @@ func walker(t reflect.Type, v reflect.Value, path string, cb callbackFn) error {
 		return cb(v, true, path)
 	}
 
+	if isBytes(v) {
+		return cb(v, false, path)
+	}
+
 	switch t.Kind() {
 	case reflect.Struct:
 		for idx := 0; idx < t.NumField(); idx++ {
